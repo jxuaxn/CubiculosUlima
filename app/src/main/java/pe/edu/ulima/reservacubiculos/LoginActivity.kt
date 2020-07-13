@@ -1,9 +1,11 @@
 package pe.edu.ulima.reservacubiculos
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_login.*
@@ -14,6 +16,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         setup()
     }
+
     private fun setup(){
         title = "Login"
         butLogin.setOnClickListener { v: View ->
