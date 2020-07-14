@@ -1,32 +1,29 @@
 package pe.edu.ulima.reservacubiculos.model.dao
 
 import android.util.Log
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 
-class usuarioDAO{
-    fun obtenerUsuarios(block:(List<Usuario>)-> Unit){
+class usuarioDAO {
+    fun obtenerIdsReservas(email : String, block:(ArrayList<String>)-> Unit) {
         val databaseReference = FirebaseFirestore.getInstance()
-        val listaUsuarios = ArrayList<Usuario>()
+        val listaIdsReservas = ArrayList<String>()
 
-
-        var collection = databaseReference?.collection("Usuarios")
-        collection!!.get().addOnSuccessListener {
-            for(doc in it){
-                listaUsuarios.add(Usuario(
-                    doc.id,
-                    doc["nombre"] as String,
-                    doc["reserva"] as String))
+        val collection = databaseReference.collection("Usuarios")
+        collection.whereEqualTo("nombre", email).get().addOnSuccessListener {
+            for(doc in it) {
+                listaIdsReservas.add(doc["reserva"] as String)
             }
-            block(listaUsuarios)
+            block(listaIdsReservas)
         }
     }
 
-    fun obtenerReservas(block:(List<Reservas>)->Unit){
+    fun obtenerReservas(listaIdsReservas : ArrayList<String>, block:(List<Reservas>) -> Unit){
         val databaseReference = FirebaseFirestore.getInstance()
         val listaReservas = ArrayList<Reservas>()
-        var collection = databaseReference?.collection("Reservas")
-        collection!!.get().addOnSuccessListener {
-            for (doc in it){
+        val collection = databaseReference.collection("Reservas")
+        collection.whereIn(FieldPath.documentId(), listaIdsReservas).get().addOnSuccessListener {
+            for (doc in it) {
                 listaReservas.add(Reservas(
                     doc.id,
                     doc["cubiculo"] as String,

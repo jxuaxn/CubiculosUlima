@@ -16,4 +16,10 @@
         app:title="Reserva de Cubiculos"
         />
 
+    <ListView
+        android:id="@+id/lviReservas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_reserva"/>
+
 </LinearLayout>

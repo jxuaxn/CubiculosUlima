@@ -6,45 +6,36 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ListView
 import android.widget.Toolbar
 import kotlinx.android.synthetic.main.activity_home.*
+import pe.edu.ulima.reservacubiculos.adapters.ListadoReservasAdapter
 import pe.edu.ulima.reservacubiculos.model.dao.Reservas
 import pe.edu.ulima.reservacubiculos.model.dao.usuarioDAO
 
 
 class HomeActivity : AppCompatActivity() {
+    private var mListaReservas : ListView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         val bundle : Bundle? = intent.extras
         val email:String? = bundle?.getString("email")
         val dao = usuarioDAO()
-        var reserva : String? = null
         setup()
         setSupportActionBar(toolbar)
 
+        Log.i(javaClass.canonicalName, "$email")
 
-        dao.obtenerUsuarios {
-            for (doc in it){
-                if (doc.nombre==email){
-                    reserva = doc.reserva
-                    break
+        dao.obtenerIdsReservas(email!!) { reservasUsuario ->
+            Log.i(javaClass.canonicalName, reservasUsuario.toString())
+            dao.obtenerReservas(reservasUsuario) {
+                for(doc in it) {
+                    mListaReservas = findViewById(R.id.lviReservas)
+                    mListaReservas?.adapter = ListadoReservasAdapter(this, it)
                 }
             }
         }
-        dao.obtenerReservas {
-            for(doc in it){
-                if (doc.id == reserva){
-                    Log.i(javaClass.canonicalName, "cubiculo ${doc.cubiculo}")
-                    Log.i(javaClass.canonicalName, "Fecha ${doc.fecha}")
-                    Log.i(javaClass.canonicalName, "hora ${doc.hora}")
-                    break
-                }
-            }
-        }
-
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
