@@ -19,14 +19,30 @@ class HomeActivity : AppCompatActivity() {
         val bundle : Bundle? = intent.extras
         val email:String? = bundle?.getString("email")
         val dao = usuarioDAO()
+        var reserva : String? = null
         setup()
         setSupportActionBar(toolbar)
 
-        if (email != null) {
-            dao.obtenerReservas(email){
-                //Log.i(javaClass.canonicalName,"cubiculo: ${it[0].cubiculo}")
+
+        dao.obtenerUsuarios {
+            for (doc in it){
+                if (doc.nombre==email){
+                    reserva = doc.reserva
+                    break
+                }
             }
         }
+        dao.obtenerReservas {
+            for(doc in it){
+                if (doc.id == reserva){
+                    Log.i(javaClass.canonicalName, "cubiculo ${doc.cubiculo}")
+                    Log.i(javaClass.canonicalName, "Fecha ${doc.fecha}")
+                    Log.i(javaClass.canonicalName, "hora ${doc.hora}")
+                    break
+                }
+            }
+        }
+
 
 
     }
