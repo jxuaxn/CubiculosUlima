@@ -18,7 +18,7 @@ class BugActivity : AppCompatActivity() {
         setContentView(R.layout.activity_bug)
         setSupportActionBar(toolbar)
         butSendEmail.setOnClickListener {
-            var mensaje = eteMensaje.text.toString().trim()
+            val mensaje = eteMensaje.text.toString().trim()
 
             sendEmail(mensaje)
         }
@@ -36,10 +36,9 @@ class BugActivity : AppCompatActivity() {
         try {
             startActivity(Intent.createChooser(mIntent, "Elige Correo"))
             Toast.makeText(this, "Mensaje Enviado", Toast.LENGTH_SHORT).show()
-        }catch (e:Exception){
+        } catch (e:Exception) {
             Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
         }
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -49,10 +48,8 @@ class BugActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-        if (id == R.id.bug){
-            val homeIntent = Intent(this, BugActivity::class.java).apply {
-            }
-            startActivity(homeIntent)
+        if (id == R.id.bug) {
+            null
         }
         return false
     }

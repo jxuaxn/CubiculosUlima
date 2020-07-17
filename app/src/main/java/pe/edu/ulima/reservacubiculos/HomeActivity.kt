@@ -3,56 +3,77 @@ package pe.edu.ulima.reservacubiculos
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ListView
-import android.widget.Toolbar
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_home.*
-import pe.edu.ulima.reservacubiculos.adapters.ListadoReservasAdapter
-import pe.edu.ulima.reservacubiculos.model.dao.Reservas
-import pe.edu.ulima.reservacubiculos.model.dao.usuarioDAO
 
 
 class HomeActivity : AppCompatActivity() {
-    private var mListaReservas : ListView? = null
+    private var mDrawerLayout : DrawerLayout? = null
+    private var mNavigationView : NavigationView? = null
+    private var mToolbar : Toolbar? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        val bundle : Bundle? = intent.extras
-        val email:String? = bundle?.getString("email")
-        val dao = usuarioDAO()
         setup()
         setSupportActionBar(toolbar)
 
-        Log.i(javaClass.canonicalName, "$email")
+        mDrawerLayout = findViewById(R.id.drawerLayout)
+        mNavigationView = findViewById(R.id.navigation)
+        mToolbar = findViewById(R.id.toolbar)
 
-        dao.obtenerIdsReservas(email!!) { reservasUsuario ->
-            Log.i(javaClass.canonicalName, reservasUsuario.toString())
-            dao.obtenerReservas(reservasUsuario) {
-                for(doc in it) {
-                    mListaReservas = findViewById(R.id.lviReservas)
-                    mListaReservas?.adapter = ListadoReservasAdapter(this, it)
-                }
+        setSupportActionBar(mToolbar)
+
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_hamburger)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        mNavigationView?.setNavigationItemSelectedListener { mu: MenuItem ->
+            when(mu.itemId) {
+                R.id.btnVisualizar -> loadFragment("Visualizar")
+                R.id.btnReservar -> loadFragment("Reservar")
             }
+            mDrawerLayout?.closeDrawers()
+            true
         }
+
+        mNavigationView?.setCheckedItem(R.id.btnVisualizar)
+
+        supportFragmentManager.beginTransaction().replace(R.id.flContent, VisualizarFragment()).commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
-        return true
+        return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        if (id == R.id.bug){
-            val homeIntent = Intent(this, BugActivity::class.java).apply {
+        when(item.itemId) {
+            android.R.id.home -> mDrawerLayout?.openDrawer(GravityCompat.START)
+            R.id.bug -> {
+                val homeIntent = Intent(this, BugActivity::class.java)
+                startActivityForResult(homeIntent,100)
             }
-            startActivity(homeIntent)
         }
-        return false
+        return super.onOptionsItemSelected(item)
     }
-    private fun setup(){
 
+    private fun loadFragment(type : String) {
+        var fragment : Fragment? = null
+        if (type == "Visualizar") {
+            fragment = VisualizarFragment()
+        } else if (type == "Reservar") {
+            fragment = ReservarFragment()
+        }
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.flContent, fragment!!)
+        ft.commit()
     }
+
+    private fun setup() {}
 }
