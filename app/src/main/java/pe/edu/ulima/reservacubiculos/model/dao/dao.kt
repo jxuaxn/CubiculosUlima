@@ -14,7 +14,11 @@ class usuarioDAO {
             for(doc in it) {
                 listaIdsReservas.add(doc["reserva"] as String)
             }
-            block(listaIdsReservas)
+            if (listaIdsReservas.isEmpty()){
+                Log.i(javaClass.canonicalName, "No tiene reservas")
+            }else{
+
+                block(listaIdsReservas)}
         }
     }
 
