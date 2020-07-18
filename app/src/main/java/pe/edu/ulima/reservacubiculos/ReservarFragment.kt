@@ -11,6 +11,8 @@ import android.widget.*
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_reservar.*
+import pe.edu.ulima.reservacubiculos.model.dao.Reservas
+import pe.edu.ulima.reservacubiculos.model.dao.usuarioDAO
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.Month
@@ -28,6 +30,7 @@ class ReservarFragment : Fragment() {
     private var btnSubmit : Button? = null
     private var spinnerPabellones : Spinner? = null
     private val cal : Calendar = Calendar.getInstance()
+    private var dia = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +43,10 @@ class ReservarFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         activity!!.title = getString(R.string.reserve)
+
+
+        val bundle : Bundle? = activity?.intent?.extras
+        val email : String? = bundle?.getString("email")
 
         eteTime = activity?.findViewById(R.id.eteTime)
         eteDate = activity?.findViewById(R.id.eteDate)
@@ -57,7 +64,6 @@ class ReservarFragment : Fragment() {
                         cal.set(Calendar.MINUTE, minute)
                         eteTime?.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(cal.time))
                     }
-                    else Toast.makeText(requireContext(), "Ingrese un hora correcta", Toast.LENGTH_SHORT).show()
                 },
                 cal.get(Calendar.HOUR_OF_DAY),
                 cal.get(Calendar.MINUTE),
@@ -69,12 +75,13 @@ class ReservarFragment : Fragment() {
                 requireActivity(),
                 DatePickerDialog.OnDateSetListener { view, year, month, day ->
                     if (validateDate(year, month, day)) {
+                        dia = day
+
                         cal.set(Calendar.YEAR, year)
                         cal.set(Calendar.MONTH, month)
                         cal.set(Calendar.DAY_OF_MONTH, day)
                         eteDate?.setText(SimpleDateFormat.getDateInstance(DateFormat.SHORT).format(cal.time))
                     }
-                    else Toast.makeText(requireContext(), "Ingrese una fecha correcta", Toast.LENGTH_SHORT).show()
                 },
                 cal.get(Calendar.YEAR),
                 cal.get(Calendar.MONTH),
@@ -93,14 +100,22 @@ class ReservarFragment : Fragment() {
         }
 
         btnSubmit?.setOnClickListener {
-            val pabellon = spinnerPabellones?.selectedItem
-            val codes = ArrayList<String>()
-            for (i in 0..codesContainer!!.childCount) {
-                val v = codesContainer?.getChildAt(i) as EditText
-                codes.add(v.text.toString())
+            val pabellon = spinnerPabellones?.selectedItem as String
+            val date = eteDate?.text.toString()
+            val time = eteTime?.text.toString()
+
+            if (date.trim().isEmpty() || time.trim().isEmpty()) {
+                Toast.makeText(requireContext(), "Complete todos los campos", Toast.LENGTH_SHORT).show()
+            } else {
+                val reserva = Reservas("0", pabellon, date, time)
+                val dao = usuarioDAO()
+                dao.crearReserva(reserva) { id : String ->
+                    dao.crearUsuarioAReserva(email!!, id) {
+                        Toast.makeText(requireContext(), "Reserva creada", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
-            val date = eteDate?.text
-            val time = eteTime?.text
+
         }
     }
 
@@ -108,17 +123,22 @@ class ReservarFragment : Fragment() {
         if (year != cal.get(Calendar.YEAR) ||
             month != cal.get(Calendar.MONTH) ||
             dayOfMonth < cal.get(Calendar.DAY_OF_MONTH)) {
+            Toast.makeText(requireContext(), "Ingrese un fecha correcta", Toast.LENGTH_SHORT).show()
             return false
         }
         return true
     }
 
     private fun validateTime(hour : Int, minute : Int) : Boolean {
-        if (eteDate?.text!!.isEmpty()) {
-            Toast.makeText(requireContext(), "Ingrese una fecha primero", Toast.LENGTH_SHORT).show()
-        }
-        if (hour < cal.get(Calendar.HOUR_OF_DAY) || minute != 0) {
-            return false
+        if (dia == Calendar.DAY_OF_MONTH) {
+            if (hour < cal.get(Calendar.HOUR_OF_DAY)) {
+                Toast.makeText(requireContext(), "Ingrese una hora correcta", Toast.LENGTH_SHORT).show()
+                return false
+            }
+            else if (minute < cal.get(Calendar.MINUTE)) {
+                    Toast.makeText(requireContext(), "Ingrese una hora correcta", Toast.LENGTH_SHORT).show()
+                    return false
+            }
         }
         return true
     }

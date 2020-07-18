@@ -19,12 +19,12 @@ class VisualizarFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_visualizar, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         activity?.title = getString(R.string.view)
 
         val bundle : Bundle? = activity?.intent?.extras
-        val email:String? = bundle?.getString("email")
+        val email : String? = bundle?.getString("email")
 
         val dao = usuarioDAO()
         dao.obtenerIdsReservas(email!!) { reservasUsuario ->

@@ -38,6 +38,32 @@ class usuarioDAO {
             block(listaReservas)
         }
     }
+
+    fun crearReserva(reserva : Reservas, block: (id : String) -> Unit) {
+        val dbReference = FirebaseFirestore.getInstance()
+        val collection = dbReference.collection("Reservas")
+        val map = HashMap<String, Any>()
+        map["cubiculo"] = reserva.cubiculo
+        map["fecha"] = reserva.fecha
+        map["hora"] = reserva.hora
+
+        collection.add(map).addOnSuccessListener {
+            block(it.id)
+        }
+    }
+
+    fun crearUsuarioAReserva(email : String, id : String, block: () -> Unit) {
+        val dbReference = FirebaseFirestore.getInstance()
+        val collection = dbReference.collection("Usuarios")
+        val map = HashMap<String, Any>()
+        map["nombre"] = email
+        map["reserva"] = id
+
+        collection.add(map).addOnSuccessListener {
+            block()
+        }
+    }
+
     /*val listaReservas = ArrayList<Reservas>()
     for (doc in listaUsuarios){
         if (doc.nombre == email ){
